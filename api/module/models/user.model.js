@@ -1,7 +1,4 @@
 const mongoose = require('mongoose');
-const connectDb = require('../dbConfig');
-
-connectDb();
 
 const userSchema = mongoose.Schema({
     name: {
@@ -22,13 +19,7 @@ const userSchema = mongoose.Schema({
     active: {
         type: Boolean,
         default: true
-    },
-    tasks: [
-        {
-            type: mongoose.Schema.ObjectId,
-            ref: 'UserModel'
-        }
-    ]
+    }
 })
 
 const UserModel = mongoose.model('UserModel', userSchema)

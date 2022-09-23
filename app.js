@@ -3,8 +3,11 @@ const express = require('express');
 const app = express();
 const bodyparser = require('body-parser');
 const cors = require('cors');
+const connectDb = require('./api/module/dbConfig');
 
 const v1 = require('./api/routers');
+
+connectDb();
 
 const corsOptions = {
     origin: '*',
