@@ -11,6 +11,9 @@ taskRouter.route('/')
 taskRouter.route('/new')
 .post(taskController.createTask)
 
+taskRouter.route('/latest')
+.get(taskController.latestTask)
+
 taskRouter.route('/:taskID')
 .get(taskController.getTask)
 .patch(taskController.updateTask)

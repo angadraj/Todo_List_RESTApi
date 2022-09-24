@@ -1,13 +1,20 @@
 const TaskModel = require('../../module/models/task.model');
-const { sendResponse } = require('../../../utils/response');
+const { sendResponse } = require('../../module/utils/response');
+const moment = require('moment');
+const { sendEmail } = require('../../module/utils/mailService');
 
 const taskController = {
     allTasks: async function (req, res) {
         try {
+            let page = parseInt(req.query.page);
+            let pageSize = parseInt(req.query.pageSize);
+            if (page === 0) {
+                return sendResponse(res, 400, false, "invalid page", null, "error");
+            }
             const allTasks = await TaskModel.find({
                 userId: req.userId,
                 active: true
-            })
+            }).skip((page - 1) * pageSize).limit(pageSize)
             return sendResponse(res, 200, true, "All tasks retrieved", allTasks, null);
         
         } catch (e) {
@@ -17,23 +24,60 @@ const taskController = {
 
     createTask: async function (req, res) {
         try {
-            const { title, description } = req.body;
-            if (!title || !description) {
+            const { title, description, startDateTime, endDateTime } = req.body;
+            if (!title || !description || !startDateTime || !endDateTime) {
                 return sendResponse(res, 400, false, "title & description are required", null, "error");
             }
             const newTask = await TaskModel.create({
                 title: title,
                 description: description,
-                userId: req.userId
+                userId: req.userId,
+                startDateTime: startDateTime,
+                endDateTime: endDateTime
             })
+
+            sendEmail({ 
+                userEmail: req.userEmail,
+                title: newTask.title, 
+                description: newTask.description, 
+                startDateTime: moment(newTask.startDateTime).format('MMMM Do YYYY, h:mm:ss a'),
+                endDateTime: moment(newTask.endDateTime).format('MMMM Do YYYY, h:mm:ss a')
+            });
+
             return sendResponse(res, 200, true, "Task Created!", {
                 id: newTask.id,
                 title: newTask.title,
                 description: newTask.description,
-                userId: newTask.userId
+                userId: newTask.userId,
+                startDateTime: newTask.startDateTime,
+                endDateTime: newTask.endDateTime
             }, null);
         } catch (e) {
             console.log(e);
+        }
+    },
+
+    latestTask: async function (req, res) {
+        try {
+            const allTasks = await TaskModel.find({
+                userId: req.userId,
+                active: true
+            });
+
+            let latestTask = null;
+            for (let i = 0; i < allTasks.length; i++) {
+                let status = checkSessionTimeStatus(allTasks[i]);
+                if (status === 'PRESENT' || status === 'FUTURE') {
+                    latestTask = allTasks[i];
+                    break;
+                }
+            }
+
+            return sendResponse(res, 200, true, "Latest task retrieved", latestTask, null);
+
+        } catch (e) {
+            console.log(e);
+            return sendResponse(res, 500, false, e.message, null, "error");
         }
     },
 
@@ -51,23 +95,24 @@ const taskController = {
 
     updateTask: async function (req, res) {
         try {
-            const { title, description} = req.body;
-            if (!title || title === '' || !description || description === '') {
-                return sendResponse(res, 400, false, "title & description are required", null);
-            }
             const taskToBeUpdated = await TaskModel.findById(req.params.taskID);
             if (!taskToBeUpdated) {
                 return sendResponse(res, 400, false, "Invalid task id", null, "error");
             }
-            taskToBeUpdated.title = title;
-            taskToBeUpdated.description = description;
+            Object.keys(req.body).forEach(function (key) {
+                if (taskToBeUpdated[key]) {
+                    taskToBeUpdated[key] = req.body[key];
+                }
+            })
             await taskToBeUpdated.save();
 
             return sendResponse(res, 200, true, "Task updated", {
                 id: taskToBeUpdated.id, 
                 title: taskToBeUpdated.title,
                 description: taskToBeUpdated.description,
-                active: taskToBeUpdated.active
+                active: taskToBeUpdated.active,
+                startDateTime: taskToBeUpdated.startDateTime,
+                endDateTime: taskToBeUpdated.endDateTime
             });
 
         } catch (e) {
@@ -97,5 +142,22 @@ const taskController = {
         }
     }
 }
+
+// helpers
+function checkSessionTimeStatus (task) {
+    const taskStartTime = moment(task.startDateTime);
+    const taskEndTime = moment(task.endDateTime);
+    const currentDateTime = moment();
+    if (taskStartTime.diff(currentDateTime, "minutes") > 0) {
+      return "FUTURE";
+    } else if (
+        taskStartTime.diff(currentDateTime, "minutes") <= 0 &&
+        taskEndTime.diff(currentDateTime, "minutes") >= 0
+    ) {
+      return "PRESENT";
+    } else {
+      return "PAST";
+    }
+};
 
 module.exports = taskController;

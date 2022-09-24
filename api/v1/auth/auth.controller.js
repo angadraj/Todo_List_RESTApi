@@ -1,9 +1,10 @@
 require('dotenv').config();
-const { sendResponse } = require('../../../utils/response');
+const { sendResponse } = require('../../module/utils/response');
 const UserModel = require('../../module/models/user.model');
 const emailValidator = require('email-validator')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
+const { sendEmail } = require('../../module/utils/mailService');
 
 const authController = {
     
@@ -36,6 +37,8 @@ const authController = {
                 'userId': newUser.id,
                 'email': newUser.email
             }, process.env.JWT_SECRET);
+
+            sendEmail({userEmail: newUser.email});
 
             return sendResponse(res, 200, true, "Welcome User", {
                 id: newUser.id,

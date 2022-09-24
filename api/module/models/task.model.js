@@ -14,6 +14,14 @@ const taskSchema = mongoose.Schema({
         type: Boolean,
         default: true
     },
+    startDateTime: {
+        type: Date,
+        default: Date.now()
+    },
+    endDateTime: {
+        type: Date,
+        default: Date.now()
+    },
     userId: {
         type: mongoose.Schema.ObjectId,
         ref: 'UserModel'

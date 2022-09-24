@@ -21,6 +21,7 @@ const verifyToken = async function (req, res, next) {
             })
         }
         req.userId = decoded.userId;
+        req.userEmail = decoded.email;
         next();
     });
 }
