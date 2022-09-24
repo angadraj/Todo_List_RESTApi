@@ -4,8 +4,10 @@ const app = express();
 const bodyparser = require('body-parser');
 const cors = require('cors');
 const connectDb = require('./api/module/dbConfig');
+const morgan = require('morgan')
 
 const v1 = require('./api/routers');
+const logger = require('./api/module/utils/logger');
 
 connectDb();
 
@@ -14,6 +16,8 @@ const corsOptions = {
     credentials: true,
     optionSuccessStatus: 200
 }
+
+app.use(morgan('combined'));
 
 app.use(cors(corsOptions))
 
@@ -41,5 +45,5 @@ app.use(bodyparser.raw({
 app.use('/api/v1', v1)
 
 app.listen(process.env.PORT, function () {
-    console.log('app listening at ', process.env.PORT)
+    logger.info('app listening at ', process.env.PORT)
 })

@@ -5,6 +5,7 @@ const emailValidator = require('email-validator')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const { sendEmail } = require('../../module/utils/mailService');
+const logger = require('../../module/utils/logger');
 
 const authController = {
     
@@ -49,7 +50,7 @@ const authController = {
             }, null);
             
         } catch (e) {
-            console.log(e);
+            logger.error(e);
             return sendResponse(res, 500, false, e.message, null, "error");
         }
     },
@@ -78,7 +79,7 @@ const authController = {
             return sendResponse(res, 200, true, "User logged in", { token: token, userId: existingUser.id, email: existingUser.email, name: existingUser.name, active: existingUser.active }, null);
 
         } catch (e) {
-            console.log(e);
+            logger.error(e);
             return sendResponse(res, 500, false, e.message, null, "error");
         }
     }

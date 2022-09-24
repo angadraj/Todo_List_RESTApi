@@ -2,6 +2,7 @@ const TaskModel = require('../../module/models/task.model');
 const { sendResponse } = require('../../module/utils/response');
 const moment = require('moment');
 const { sendEmail } = require('../../module/utils/mailService');
+const logger = require('../../module/utils/logger');
 
 const taskController = {
     allTasks: async function (req, res) {
@@ -18,7 +19,8 @@ const taskController = {
             return sendResponse(res, 200, true, "All tasks retrieved", allTasks, null);
         
         } catch (e) {
-            console.log(e);
+            logger.error(e);
+            return sendResponse(res, 500, false, e.message, null, "error");
         }
     },
 
@@ -53,7 +55,8 @@ const taskController = {
                 endDateTime: newTask.endDateTime
             }, null);
         } catch (e) {
-            console.log(e);
+            logger.error(e);
+            return sendResponse(res, 500, false, e.message, null, "error");
         }
     },
 
@@ -76,7 +79,7 @@ const taskController = {
             return sendResponse(res, 200, true, "Latest task retrieved", latestTask, null);
 
         } catch (e) {
-            console.log(e);
+            logger.error(e);
             return sendResponse(res, 500, false, e.message, null, "error");
         }
     },
@@ -89,7 +92,8 @@ const taskController = {
             }
             return sendResponse(res, 200, true, "Task retrieved", task, null);
         } catch (e) {
-            console.log(e);
+            logger.error(e);
+            return sendResponse(res, 500, false, e.message, null, "error");
         }
     },
 
@@ -116,7 +120,8 @@ const taskController = {
             });
 
         } catch (e) {
-            console.log(e);
+            logger.error(e);
+            return sendResponse(res, 500, false, e.message, null, "error");
         }
     },
 
@@ -138,7 +143,8 @@ const taskController = {
 
 
         } catch (e) {
-            console.log(e);
+            logger.error(e);
+            return sendResponse(res, 500, false, e.message, null, "error");
         }
     }
 }

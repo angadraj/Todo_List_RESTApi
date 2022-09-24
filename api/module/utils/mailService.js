@@ -15,7 +15,7 @@ module.exports.sendEmail = function sendEmail (data) {
 
         let subject = "Welcome User";
         let text = "Thanks for Using Our App";
-        let html = "<b>We hope that your life events come in sync after organising them on our platform.<br> Keep Rocking!!</b>";
+        let html = "<b>We hope that your life events come in sync after creating them on our platform.<br> Keep Rocking!!</b>";
         
         let { title, description, startDateTime, endDateTime } = data;
         if (title && description && startDateTime && endDateTime) {
