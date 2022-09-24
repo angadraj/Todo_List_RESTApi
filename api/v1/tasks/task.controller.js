@@ -15,7 +15,7 @@ const taskController = {
             const allTasks = await TaskModel.find({
                 userId: req.userId,
                 active: true
-            }).skip((page - 1) * pageSize).limit(pageSize)
+            }).sort({ "startDateTime": 1 }).skip((page - 1) * pageSize).limit(pageSize)
             return sendResponse(res, 200, true, "All tasks retrieved", allTasks, null);
         
         } catch (e) {
@@ -65,7 +65,7 @@ const taskController = {
             const allTasks = await TaskModel.find({
                 userId: req.userId,
                 active: true
-            });
+            }).sort({ "startDateTime": 1 });
 
             let latestTask = null;
             for (let i = 0; i < allTasks.length; i++) {
